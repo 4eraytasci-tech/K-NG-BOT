@@ -1,0 +1,463 @@
+{
+  "xpData": [
+    [
+      "1520781174656467154",
+      {
+        "xp": 1559,
+        "level": 16
+      }
+    ],
+    [
+      "1172312130251411476",
+      {
+        "xp": 5,
+        "level": 1
+      }
+    ],
+    [
+      "1425958499665313977",
+      {
+        "xp": 5,
+        "level": 1
+      }
+    ],
+    [
+      "1533870222136840255",
+      {
+        "xp": 220,
+        "level": 3
+      }
+    ],
+    [
+      "1553324460726288483",
+      {
+        "xp": 245,
+        "level": 3
+      }
+    ],
+    [
+      "1503144178127864009",
+      {
+        "xp": 290,
+        "level": 3
+      }
+    ],
+    [
+      "1055116194383941645",
+      {
+        "xp": 10,
+        "level": 1
+      }
+    ]
+  ],
+  "kingMoneyData": [
+    [
+      "1520781174656467154",
+      123
+    ],
+    [
+      "1533870222136840255",
+      220
+    ],
+    [
+      "1553324460726288483",
+      245
+    ],
+    [
+      "1503144178127864009",
+      290
+    ],
+    [
+      "1055116194383941645",
+      10
+    ]
+  ],
+  "gunlukData": [
+    [
+      "1520781174656467154",
+      1794675108605
+    ]
+  ],
+  "uyarilar": [],
+  "afkData": [],
+  "zooData": [
+    [
+      "1520781174656467154",
+      {
+        "Tilki": 1
+      }
+    ]
+  ],
+  "guildAyarlar": {
+    "1570150711294042153": {
+      "otoMod": true,
+      "linkEngel": false,
+      "izinliLinkler": [
+        "youtube.com",
+        "youtu.be",
+        "tenor.com",
+        "giphy.com"
+      ],
+      "davetEngel": true,
+      "spamEngel": true,
+      "spamMesajLimiti": 5,
+      "spamSaniye": 5,
+      "spamCezaDakika": 5,
+      "tekrarMesajEngel": true,
+      "capsEngel": false,
+      "capsYuzde": 70,
+      "capsMinUzunluk": 8,
+      "etiketEngel": true,
+      "maxEtiketSayisi": 4,
+      "emojiSpamEngel": true,
+      "maxEmojiSayisi": 8,
+      "zalgoEngel": true,
+      "yeniHesapEngel": false,
+      "yeniHesapMinGun": 3,
+      "antiRaid": false,
+      "modLogKanal": "",
+      "yasakliKelimeler": [
+        "amk",
+        "aq",
+        "orospu",
+        "piç",
+        "sikiş",
+        "pırt",
+        "tre"
+      ],
+      "oyunKanallari": [],
+      "kumarhaneKanallari": [],
+      "komutKanallari": [],
+      "hosgeldinKanal": "1570165181235859649",
+      "hosgeldinMesaj": "Hoş geldin {user}! Seninle birlikte **{memberCount}** kişi olduk!",
+      "otoRol": "1570152660924112926",
+      "ticketKategori": "1571204324971909292",
+      "ticketYetkiliRoller": [
+        "1570155240748089364"
+      ],
+      "ticketTamYetkiliRoller": [],
+      "ticketKonular": [
+        {
+          "id": "genel",
+          "isim": "Genel Destek",
+          "aciklama": "Sunucu içi genel sorularınız için",
+          "emoji": "📩"
+        },
+        {
+          "id": "sikayet",
+          "isim": "Üye / Yetkili Şikayeti",
+          "aciklama": "Kural ihlali bildirmek için",
+          "emoji": "🚨"
+        }
+      ],
+      "gunlukOdul": 250,
+      "xpZorlukCarpani": 250,
+      "sesXpAktif": true,
+      "sesDakikaXp": 15,
+      "sesDakikaKm": 10,
+      "panikModu": false,
+      "ticketYetkiliRol": "1570155240748089364",
+      "ticketTamYetkiliRol": ""
+    }
+  },
+  "guildKomutlar": {
+    "1570150711294042153": []
+  },
+  "guildBiletler": {
+    "1570150711294042153": [
+      {
+        "id": 1794859025889,
+        "kanalAdi": "ticket-turkaskeri347",
+        "konu": "Genel Destek",
+        "kapatan": "turkaskeri347",
+        "kapanisTarihi": "16.11.2026 22:57:05",
+        "mesajSayisi": 8,
+        "mesajlar": [
+          {
+            "yazar": "KİNG#6888",
+            "avatar": "https://cdn.discordapp.com/avatars/1570441720254959757/54439ef183ce1d27439a7da40682cf41.webp?size=64",
+            "icerik": "<@1520781174656467154> <@&1570155240748089364>",
+            "zaman": "22:56"
+          },
+          {
+            "yazar": "turkaskeri347",
+            "avatar": "https://cdn.discordapp.com/avatars/1520781174656467154/e4f8ce71eeba3165385719e464e5e684.webp?size=64",
+            "icerik": "sesk",
+            "zaman": "22:56"
+          },
+          {
+            "yazar": "turkaskeri347",
+            "avatar": "https://cdn.discordapp.com/avatars/1520781174656467154/e4f8ce71eeba3165385719e464e5e684.webp?size=64",
+            "icerik": "kasdfkndsf",
+            "zaman": "22:56"
+          },
+          {
+            "yazar": "turkaskeri347",
+            "avatar": "https://cdn.discordapp.com/avatars/1520781174656467154/e4f8ce71eeba3165385719e464e5e684.webp?size=64",
+            "icerik": "sa",
+            "zaman": "22:56"
+          },
+          {
+            "yazar": "ErensiBOT#4008",
+            "avatar": "https://cdn.discordapp.com/avatars/689766089567109158/e1a929904c2ad28c6c7f2c0ab2d90eb5.webp?size=64",
+            "icerik": "Aleyküm selam <@1520781174656467154>",
+            "zaman": "22:56"
+          },
+          {
+            "yazar": "turkaskeri347",
+            "avatar": "https://cdn.discordapp.com/avatars/1520781174656467154/e4f8ce71eeba3165385719e464e5e684.webp?size=64",
+            "icerik": "merhaba",
+            "zaman": "22:56"
+          },
+          {
+            "yazar": "turkaskeri347",
+            "avatar": "https://cdn.discordapp.com/avatars/1520781174656467154/e4f8ce71eeba3165385719e464e5e684.webp?size=64",
+            "icerik": "aq",
+            "zaman": "22:56"
+          },
+          {
+            "yazar": "KİNG#6888",
+            "avatar": "https://cdn.discordapp.com/avatars/1570441720254959757/54439ef183ce1d27439a7da40682cf41.webp?size=64",
+            "icerik": "💾 Konuşma geçmişi site arşivine kaydediliyor, kanal 5 saniye içinde silinecek...",
+            "zaman": "22:57"
+          }
+        ]
+      },
+      {
+        "id": 1794858940323,
+        "kanalAdi": "ticket-turkaskeri347",
+        "konu": "Genel Destek",
+        "kapatan": "turkaskeri347",
+        "kapanisTarihi": "16.11.2026 22:55:40",
+        "mesajSayisi": 2,
+        "mesajlar": [
+          {
+            "yazar": "KİNG#6888",
+            "avatar": "https://cdn.discordapp.com/avatars/1570441720254959757/54439ef183ce1d27439a7da40682cf41.webp?size=64",
+            "icerik": "<@1520781174656467154> <@&1570155240748089364>",
+            "zaman": "22:55"
+          },
+          {
+            "yazar": "KİNG#6888",
+            "avatar": "https://cdn.discordapp.com/avatars/1570441720254959757/54439ef183ce1d27439a7da40682cf41.webp?size=64",
+            "icerik": "💾 Konuşma geçmişi site arşivine kaydediliyor, kanal 5 saniye içinde silinecek...",
+            "zaman": "22:55"
+          }
+        ]
+      }
+    ]
+  },
+  "guildLogs": {
+    "1570150711294042153": [
+      {
+        "id": 1794861382937,
+        "tarih": "16.11.2026 23:36:22",
+        "kategori": "MODERASYON",
+        "islem": "Küfür / Yasaklı Kelime Engellendi",
+        "detay": "#┃sohbet: \"tre\"",
+        "kullanici": "frederic_347"
+      },
+      {
+        "id": 1794861383326,
+        "tarih": "16.11.2026 23:36:22",
+        "kategori": "MODERASYON",
+        "islem": "Mesaj Silindi",
+        "detay": "#┃sohbet kanalında: \"tre\"",
+        "kullanici": "frederic_347"
+      },
+      {
+        "id": 1794861377392,
+        "tarih": "16.11.2026 23:36:16",
+        "kategori": "MODERASYON",
+        "islem": "Küfür / Yasaklı Kelime Engellendi",
+        "detay": "#┃sohbet: \"tre\"",
+        "kullanici": "frederic_347"
+      },
+      {
+        "id": 1794861377857,
+        "tarih": "16.11.2026 23:36:16",
+        "kategori": "MODERASYON",
+        "islem": "Mesaj Silindi",
+        "detay": "#┃sohbet kanalında: \"tre\"",
+        "kullanici": "frederic_347"
+      },
+      {
+        "id": 1794861244554,
+        "tarih": "16.11.2026 23:34:03",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "Yasaklı kelime eklendi: \"tre\"",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794861238936,
+        "tarih": "16.11.2026 23:33:58",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "1.000.000x Moderasyon Kalkanı ayarları kaydedildi",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794861207524,
+        "tarih": "16.11.2026 23:33:27",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "1.000.000x Moderasyon Kalkanı ayarları kaydedildi",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794861161365,
+        "tarih": "16.11.2026 23:32:40",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "Yasaklı kelime eklendi: \"pırt\"",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794861120129,
+        "tarih": "16.11.2026 23:31:59",
+        "kategori": "PANEL",
+        "islem": "Özel Komut Güncellendi",
+        "detay": "Özel komut silindi: !server",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794861093527,
+        "tarih": "16.11.2026 23:31:32",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "Kanal kısıtlaması kaldırıldı",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794861092633,
+        "tarih": "16.11.2026 23:31:32",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "Kanal kısıtlaması kaldırıldı",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794861090835,
+        "tarih": "16.11.2026 23:31:30",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "Kanal kısıtlaması eklendi",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794861090056,
+        "tarih": "16.11.2026 23:31:29",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "Kanal kısıtlaması eklendi",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794860669625,
+        "tarih": "16.11.2026 23:24:29",
+        "kategori": "PANEL",
+        "islem": "Panele Giriş Yapıldı",
+        "detay": "Güvenli OAuth2 oturumu başlatıldı",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794860581571,
+        "tarih": "16.11.2026 23:23:01",
+        "kategori": "PANEL",
+        "islem": "Panele Giriş Yapıldı",
+        "detay": "Web Dashboard OAuth2 oturumu açıldı",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794860573100,
+        "tarih": "16.11.2026 23:22:52",
+        "kategori": "PANEL",
+        "islem": "Panele Giriş Yapıldı",
+        "detay": "Web Dashboard OAuth2 oturumu açıldı",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794860560602,
+        "tarih": "16.11.2026 23:22:39",
+        "kategori": "PANEL",
+        "islem": "Panele Giriş Yapıldı",
+        "detay": "Web Dashboard OAuth2 oturumu açıldı",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794860108108,
+        "tarih": "16.11.2026 23:15:07",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "Yasaklı kelime eklendi: \"sikiş\"",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794859288399,
+        "tarih": "16.11.2026 23:01:27",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "Ticket kategorisi silindi: sek",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794859285791,
+        "tarih": "16.11.2026 23:01:25",
+        "kategori": "PANEL",
+        "islem": "Ayarlar Güncellendi",
+        "detay": "Ticket kategorisi eklendi: sek",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794859026234,
+        "tarih": "16.11.2026 22:57:05",
+        "kategori": "TICKET",
+        "islem": "Ticket Kapatıldı & Arşivlendi",
+        "detay": "#ticket-turkaskeri347 (8 mesaj) arşive eklendi",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794858970641,
+        "tarih": "16.11.2026 22:56:10",
+        "kategori": "TICKET",
+        "islem": "Ticket Açıldı",
+        "detay": "#ticket-turkaskeri347 (Genel Destek) açıldı",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794858940658,
+        "tarih": "16.11.2026 22:55:40",
+        "kategori": "TICKET",
+        "islem": "Ticket Kapatıldı & Arşivlendi",
+        "detay": "#ticket-turkaskeri347 (2 mesaj) arşive eklendi",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794858911851,
+        "tarih": "16.11.2026 22:55:10",
+        "kategori": "TICKET",
+        "islem": "Ticket Sahiplenildi",
+        "detay": "#ticket-turkaskeri347 talebini devraldı",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794858901269,
+        "tarih": "16.11.2026 22:55:00",
+        "kategori": "TICKET",
+        "islem": "Ticket Açıldı",
+        "detay": "#ticket-turkaskeri347 (Genel Destek) açıldı",
+        "kullanici": "turkaskeri347"
+      },
+      {
+        "id": 1794858257341,
+        "tarih": "16.11.2026 22:44:16",
+        "kategori": "PANEL",
+        "islem": "Panele Giriş Yapıldı",
+        "detay": "Web Dashboard OAuth2 oturumu açıldı",
+        "kullanici": "turkaskeri347"
+      }
+    ]
+  },
+  "aktifCekilisler": []
+}

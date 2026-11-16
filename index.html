@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KingBot Pro — SaaS Sunucu Yönetim Platformu</title>
+    <style>
+        :root {
+            --bg-dark: #0b0d14;
+            --bg-sidebar: #111420;
+            --bg-card: #171b2b;
+            --bg-input: #0e111b;
+            --accent: #5865F2;
+            --accent-hover: #4752C4;
+            --success: #23a55a;
+            --danger: #da373c;
+            --warning: #f0b232;
+            --text: #f2f3f5;
+            --muted: #949ba4;
+            --border: #242940;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg-dark); color: var(--text); min-height: 100vh; display: flex; }
+
+        #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            background: var(--bg-card); border-left: 4px solid var(--success); color: white;
+            padding: 14px 20px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            font-size: 14px; font-weight: 500; animation: slideIn 0.3s ease;
+        }
+        .toast.error { border-left-color: var(--danger); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        #login-screen { width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(circle at top, #1b2038, var(--bg-dark)); }
+        .login-card { background: var(--bg-card); border: 1px solid var(--border); padding: 48px 36px; border-radius: 16px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .login-card h1 { font-size: 28px; margin-bottom: 12px; }
+        .login-card p { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
+        .btn-discord { background: var(--accent); color: white; border: none; padding: 14px 24px; border-radius: 10px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; transition: 0.2s; }
+        .btn-discord:hover { background: var(--accent-hover); }
+
+        #app { display: none; width: 100%; }
+        .sidebar { width: 285px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; padding: 20px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0; }
+        .server-header { display: flex; align-items: center; gap: 12px; padding: 10px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 10px; }
+        .server-header img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
+        .server-header h3 { font-size: 14px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+        .server-header span { font-size: 11px; color: var(--success); }
+
+        .guild-select-box { margin-bottom: 16px; }
+        .guild-select-box select { width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+
+        .nav-group-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 0 12px; margin: 14px 0 6px; font-weight: 700; }
+        .nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; background: transparent; border: none; color: var(--muted); padding: 10px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; transition: 0.15s; margin-bottom: 2px; }
+        .nav-btn:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+        .nav-btn.active { background: var(--accent); color: white; font-weight: 600; }
+
+        .user-box { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); margin-top: 14px; }
+        .user-box-left { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+        .user-box img { width: 34px; height: 34px; border-radius: 50%; }
+        .user-box strong { font-size: 13px; display: block; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+        .logout-btn { background: rgba(218,55,60,0.15); color: var(--danger); border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+
+        .content { flex: 1; padding: 32px 40px; max-width: 1420px; overflow-x: hidden; }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
+        .section-header h1 { font-size: 24px; }
+        .section-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; border-radius: 12px; }
+        .stat-card span { color: var(--muted); font-size: 13px; display: block; margin-bottom: 8px; }
+        .stat-card h2 { font-size: 26px; }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+        .card h3 { font-size: 17px; margin-bottom: 6px; }
+        .card p.desc { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: var(--text);
+            padding: 11px 14px; border-radius: 8px; font-size: 14px; outline: none;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); gap: 16px; }
+        .toggle-row:last-child { border-bottom: none; }
+        .switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #2f354d; transition: .3s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .mod-subbox { background: rgba(14, 17, 27, 0.6); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-top: 8px; margin-bottom: 12px; }
+
+        .btn { padding: 10px 18px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-sm { padding: 6px 10px; font-size: 12px; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: #111; }
+
+        .tags-box { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag { background: rgba(218,55,60,0.18); border: 1px solid rgba(218,55,60,0.4); color: #ff8a8e; padding: 5px 10px; border-radius: 6px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+        .tag button { background: none; border: none; color: white; cursor: pointer; font-weight: bold; }
+        .role-pill { background: rgba(88,101,242,0.2); border: 1px solid rgba(88,101,242,0.4); color: #b9c3ff; padding: 5px 10px; border-radius: 6px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; margin: 2px; }
+        .role-pill.success { background: rgba(35,165,90,0.2); border-color: rgba(35,165,90,0.4); color: #6ee7a0; }
+        .role-pill button { background: none; border: none; color: #ff7b7b; cursor: pointer; font-weight: bold; font-size: 14px; }
+
+        /* Modal */
+        .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999; align-items: center; justify-content: center; padding: 20px; }
+        .modal-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; max-width: 720px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; }
+        .modal-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; background: #1e212b; }
+        .chat-msg { display: flex; gap: 12px; align-items: flex-start; }
+        .chat-msg img { width: 36px; height: 36px; border-radius: 50%; }
+        .chat-bubble { background: #2b2f3d; padding: 10px 14px; border-radius: 10px; flex: 1; }
+        .chat-bubble strong { font-size: 13px; color: #fff; }
+        .chat-bubble span { font-size: 11px; color: var(--muted); margin-left: 8px; }
+        .chat-bubble p { font-size: 14px; color: #dcddde; margin-top: 4px; white-space: pre-wrap; }
+
+        .embed-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+        .discord-preview-box { background: #313338; padding: 20px; border-radius: 10px; }
+        .discord-msg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .discord-msg-header img { width: 36px; height: 36px; border-radius: 50%; }
+        .bot-badge { background: #5865F2; color: white; font-size: 10px; padding: 2px 5px; border-radius: 4px; font-weight: 700; }
+        .discord-embed { background: #2b2d31; border-left: 4px solid #5865F2; padding: 14px 16px; border-radius: 4px; margin-left: 46px; }
+        .discord-embed h4 { color: white; font-size: 15px; margin-bottom: 6px; }
+        .discord-embed p { color: #dbdee1; font-size: 14px; white-space: pre-wrap; line-height: 1.4; }
+        .discord-embed img { max-width: 100%; border-radius: 6px; margin-top: 10px; display: none; }
+
+        .log-controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .table-wrap { overflow-x: auto; }
+        .log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .log-table th, .log-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+        .log-table th { color: var(--muted); font-weight: 600; background: rgba(0,0,0,0.2); }
+        .badge { padding: 4px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; }
+        .badge-PANEL { background: rgba(88,101,242,0.2); color: #8ea1e1; }
+        .badge-MODERASYON { background: rgba(218,55,60,0.2); color: #f38b8e; }
+        .badge-UYE { background: rgba(35,165,90,0.2); color: #6ee7a0; }
+        .badge-TICKET { background: rgba(240,178,50,0.2); color: #f8d07a; }
+        .badge-EKONOMI { background: rgba(168,85,247,0.2); color: #d8b4fe; }
+        .badge-ROL { background: rgba(56,189,248,0.2); color: #7dd3fc; }
+
+        @media (max-width: 960px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; }
+            .form-grid, .form-grid-3, .embed-layout { grid-template-columns: 1fr; }
+            .content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <!-- KAPATILAN BİLET SOHBET GÖRÜNTÜLEYİCİ MODAL -->
+    <div class="modal-bg" id="ticket-modal" onclick="if(event.target===this) this.style.display='none'">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-baslik">📁 Bilet Kaydı</h3>
+                <button class="btn btn-sm btn-danger" onclick="document.getElementById('ticket-modal').style.display='none'">Kapat ✕</button>
+            </div>
+            <div class="modal-body" id="modal-mesajlar"></div>
+        </div>
+    </div>
+
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h1>👑 KingBot Pro</h1>
+            <p>Gelişmiş moderasyon koruması, çoklu sunucu yönetimi, Ticket sistemi ve canlı denetim kayıtları tek panelde.</p>
+            <button class="btn-discord" onclick="girisYap()">Discord Hesabıyla Giriş Yap</button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="app">
+        <aside class="sidebar">
+            <div>
+                <div class="server-header">
+                    <img id="srv-icon" src="" alt="Server">
+                    <div style="overflow:hidden;">
+                        <h3 id="srv-name">Yükleniyor...</h3>
+                        <span>● Sistem Çevrimiçi</span>
+                    </div>
+                </div>
+
+                <div class="guild-select-box">
+                    <label style="font-size:11px; margin-bottom:4px;">Yönetilen Sunucu</label>
+                    <select id="guild-selector" onchange="sunucuDegistir(this.value)"></select>
+                </div>
+
+                <div class="nav-group-title">Güvenlik & Destek</div>
+                <button class="nav-btn active" onclick="sekmeAc('genel', this)">📊 Genel Bakış</button>
+                <button class="nav-btn" onclick="sekmeAc('moderasyon', this)">🛡️ Moderasyon</button>
+                <button class="nav-btn" onclick="sekmeAc('ticket', this)">🎫 Ticket Ayar & Kategori</button>
+                <button class="nav-btn" onclick="sekmeAc('arsiv', this)">📁 Kapatılan Biletler</button>
+                <button class="nav-btn" onclick="sekmeAc('komutlar', this)">⚡ Özel Komutlar (!server)</button>
+
+                <div class="nav-group-title">Sunucu Araçları</div>
+                <button class="nav-btn" onclick="sekmeAc('kanallar', this)">🚦 Kanal Kısıtlamaları</button>
+                <button class="nav-btn" onclick="sekmeAc('uyeler', this)">👥 Üye Yönetimi (CRM)</button>
+                <button class="nav-btn" onclick="sekmeAc('roller', this)">🎭 Butonlu Rol Menüsü</button>
+                <button class="nav-btn" onclick="sekmeAc('hosgeldin', this)">👋 Hoş Geldin & Oto-Rol</button>
+                <button class="nav-btn" onclick="sekmeAc('duyuru', this)">📢 Embed Duyuru</button>
+                <button class="nav-btn" onclick="sekmeAc('ekonomi', this)">💰 Ekonomi & Seviye</button>
+                <button class="nav-btn" onclick="sekmeAc('loglar', this)">📜 Denetim Kayıtları (Log)</button>
+            </div>
+
+            <div class="user-box">
+                <div class="user-box-left">
+                    <img id="usr-avatar" src="" alt="Avatar">
+                    <div style="overflow:hidden;">
+                        <strong id="usr-name">Yönetici</strong>
+                        <span style="font-size: 11px; color: var(--muted);">Yetkili Erişimi</span>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="cikisYap()">Çıkış</button>
+            </div>
+        </aside>
+
+        <main class="content">
+
+            <!-- 1. GENEL BAKIŞ -->
+            <section id="sec-genel" class="page-section active">
+                <div class="section-header">
+                    <div>
+                        <h1>Genel Bakış</h1>
+                        <p>Sunucunun anlık istatistikleri, acil durum kalkanı ve son olaylar.</p>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn btn-danger" id="btn-panik" onclick="panikDegistir()">🚨 Panik Modu: Kapalı</button>
+                        <button class="btn btn-primary" onclick="verileriYenile()">🔄 Yenile</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card"><span>Toplam Üye</span><h2 id="st-members">-</h2></div>
+                    <div class="stat-card"><span>Kapatılan Bilet</span><h2 id="st-tickets">-</h2></div>
+                    <div class="stat-card"><span>Özel Komut Sayısı</span><h2 id="st-cmds">-</h2></div>
+                    <div class="stat-card"><span>Bot Ping / Uptime</span><h2 id="st-ping">-</h2></div>
+                </div>
+
+                <div class="card">
+                    <h3>⚡ Son Gerçekleşen 6 Olay</h3>
+                    <div class="table-wrap" style="margin-top:12px;">
+                        <table class="log-table">
+                            <thead><tr><th>Tarih</th><th>Kategori</th><th>İşlem</th><th>Detay</th><th>Kullanıcı</th></tr></thead>
+                            <tbody id="ozet-log-tablo"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. MODERASYON AYARLARI -->
+            <section id="sec-moderasyon" class="page-section">
+                <div class="section-header">
+                    <div>
+                        <h1>🛡️ Gelişmiş Moderasyon Ayarları</h1>
+                        <p>Akıllı filtreleri, eşik değerlerini, yeni hesap korumasını ve mod-log kanalını detaylıca özelleştirin.</p>
+                    </div>
+                    <button class="btn btn-success" onclick="moderasyonKaydet()">💾 Tüm Moderasyon Ayarlarını Kaydet</button>
+                </div>
+
+                <div class="card">
+                    <h3>📡 Mod-Log & Temel Filtreler</h3>
+                    <div class="form-group" style="margin-top:12px;">
+                        <label>Discord Moderasyon Log Kanalı (Silinen/düzenlenen mesajlar ve cezalar buraya düşer)</label>
+                        <select id="mod-log-kanal"></select>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div><strong>Küfür & Argo Koruması (Sembol Gizleme Dahil)</strong><p style="font-size:12px; color:var(--muted);">Yasaklı kelimeleri ve sembollerle gizlenmiş varyasyonlarını otomatik siler.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-otomod"><span class="slider"></span></label>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div><strong>Discord Davet Linki Engeli</strong><p style="font-size:12px; color:var(--muted);">Yetkisiz discord.gg ve sunucu davet bağlantılarını engeller.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-davet"><span class="slider"></span></label>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div><strong>Genel URL / Reklam Linki Engeli</strong><p style="font-size:12px; color:var(--muted);">İzin verilen alan adları dışındaki tüm web bağlantılarını engeller.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-link"><span class="slider"></span></label>
+                    </div>
+                    <div class="mod-subbox">
+                        <label>İzin Verilen Alan Adları (Whitelist)</label>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="yeni-izinli-link" placeholder="Örn: youtube.com, tenor.com">
+                            <button class="btn btn-primary" onclick="izinliLinkEkle()">+ Ekle</button>
+                        </div>
+                        <div class="tags-box" id="izinli-link-listesi"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>⚙️ Eşik Değerli Akıllı Korumalar</h3>
+
+                    <div class="toggle-row">
+                        <div><strong>Anti-Spam & Otomatik Susturma (Timeout)</strong><p style="font-size:12px; color:var(--muted);">Belirlenen saniye içinde limitin üzerinde mesaj atan üyeyi susturur.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-spam"><span class="slider"></span></label>
+                    </div>
+                    <div class="mod-subbox form-grid-3">
+                        <div class="form-group" style="margin:0;"><label>Mesaj Limiti</label><input type="number" id="mod-spam-limit" min="2" max="20"></div>
+                        <div class="form-group" style="margin:0;"><label>Süre Penceresi (Saniye)</label><input type="number" id="mod-spam-saniye" min="2" max="30"></div>
+                        <div class="form-group" style="margin:0;"><label>Susturma Cezası (Dakika)</label><input type="number" id="mod-spam-ceza" min="1" max="1440"></div>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div><strong>Tekrarlayan Mesaj (Flood / Copy-Paste) Koruması</strong><p style="font-size:12px; color:var(--muted);">15 saniye içinde aynı mesajı art arda gönderen kullanıcıyı engeller.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-tekrar"><span class="slider"></span></label>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div><strong>Büyük Harf (Caps Lock) Oranı Koruması</strong><p style="font-size:12px; color:var(--muted);">Belirlenen karakter ve büyük harf yüzdesini aşan mesajları siler.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-caps"><span class="slider"></span></label>
+                    </div>
+                    <div class="mod-subbox form-grid">
+                        <div class="form-group" style="margin:0;"><label>Caps Lock Eşiği (%)</label><input type="number" id="mod-caps-yuzde" min="30" max="100"></div>
+                        <div class="form-group" style="margin:0;"><label>Minimum Harf Uzunluğu</label><input type="number" id="mod-caps-min" min="3" max="50"></div>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div><strong>Toplu Etiket (@everyone / @here & Çoklu Mention) Koruması</strong><p style="font-size:12px; color:var(--muted);">Toplu etiketleri ve tek mesajda aşırı üye/rol etiketlemeyi engeller.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-etiket"><span class="slider"></span></label>
+                    </div>
+                    <div class="mod-subbox">
+                        <div class="form-group" style="margin:0; max-width:260px;"><label>Tek Mesajda Maksimum Etiket</label><input type="number" id="mod-max-etiket" min="1" max="20"></div>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div><strong>Emoji Spam Koruması</strong><p style="font-size:12px; color:var(--muted);">Tek mesajda aşırı sayıda emoji kullanımını engeller.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-emoji"><span class="slider"></span></label>
+                    </div>
+                    <div class="mod-subbox">
+                        <div class="form-group" style="margin:0; max-width:260px;"><label>Tek Mesajda Maksimum Emoji</label><input type="number" id="mod-max-emoji" min="2" max="50"></div>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div><strong>Zalgo / Bozuk Glif Karakter Koruması</strong><p style="font-size:12px; color:var(--muted);">Sohbet satırlarını bozan üst üste binmiş glif karakterleri siler.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-zalgo"><span class="slider"></span></label>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🚨 Baskın (Anti-Raid) & Yeni Hesap Koruması</h3>
+                    <div class="toggle-row">
+                        <div><strong>Anti-Raid Koruması</strong><p style="font-size:12px; color:var(--muted);">10 saniye içinde 6 veya daha fazla hesap sunucuya girerse otomatik atar.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-antiraid"><span class="slider"></span></label>
+                    </div>
+                    <div class="toggle-row">
+                        <div><strong>Yeni Hesap (Alt / Fake Hesap) Koruması</strong><p style="font-size:12px; color:var(--muted);">Belirlenen günden daha yeni açılmış Discord hesaplarını sunucuya almaz.</p></div>
+                        <label class="switch"><input type="checkbox" id="mod-yenihesap"><span class="slider"></span></label>
+                    </div>
+                    <div class="mod-subbox">
+                        <div class="form-group" style="margin:0; max-width:260px;"><label>Minimum Hesap Yaşı (Gün)</label><input type="number" id="mod-yenihesap-gun" min="1" max="365"></div>
+                    </div>
+                    <div style="margin-top:16px;">
+                        <button class="btn btn-success" onclick="moderasyonKaydet()">💾 Tüm Moderasyon Ayarlarını Kaydet</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🚫 Özel Yasaklı Kelime Listesi</h3>
+                    <p class="desc"><code>kufurler.txt</code> havuzuna ek olarak bu sunucuya özel yasaklanacak kelimeleri ekleyin.</p>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="yeni-kelime" placeholder="Yasaklanacak kelimeyi yazın...">
+                        <button class="btn btn-primary" onclick="kelimeEkle()">+ Ekle</button>
+                    </div>
+                    <div class="tags-box" id="kelime-listesi"></div>
+                </div>
+            </section>
+
+            <!-- 3. GELİŞMİŞ TICKET AYARLARI & ÇOKLU ROLLER -->
+            <section id="sec-ticket" class="page-section">
+                <div class="section-header">
+                    <div>
+                        <h1>🎫 Gelişmiş Ticket (Destek) Yapılandırması</h1>
+                        <p>Çoklu destek ekibi rolleri, tam yetkili üst yönetim rolleri ve bilet kategorilerini yönetin.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔐 Kategori & Çoklu Rol Yetkileri</h3>
+                    <p class="desc">"Destek Ekibi Rolleri" bileti sadece görür; "İlgilen" butonuna basan yetkili ve "Tam Yetkili Roller" kanala yazabilir.</p>
+                    <div class="form-group">
+                        <label>Biletlerin Açılacağı Discord Kategorisi</label>
+                        <div style="display:flex; gap:10px;">
+                            <select id="tk-kategori"></select>
+                            <button class="btn btn-success" onclick="ticketKategoriKaydet()">Kaydet</button>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-top:18px;">
+                        <div class="mod-subbox">
+                            <label>Destek Ekibi Rolleri (İlgilen'e basınca yazar)</label>
+                            <div style="display:flex; gap:8px;">
+                                <select id="tk-destek-rol-sec"></select>
+                                <button class="btn btn-primary" onclick="ticketRolEkle('ticketYetkiliRoller', 'tk-destek-rol-sec')">+ Ekle</button>
+                            </div>
+                            <div class="tags-box" id="tk-destek-rol-listesi"></div>
+                        </div>
+
+                        <div class="mod-subbox">
+                            <label>Tam Yetkili Üst Yönetim Rolleri (Her türlü yazar)</label>
+                            <div style="display:flex; gap:8px;">
+                                <select id="tk-tam-rol-sec"></select>
+                                <button class="btn btn-primary" onclick="ticketRolEkle('ticketTamYetkiliRoller', 'tk-tam-rol-sec')">+ Ekle</button>
+                            </div>
+                            <div class="tags-box" id="tk-tam-rol-listesi"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📋 Özelleştirilebilir Ticket Kategorileri (Açılır Menü)</h3>
+                    <p class="desc">Üyeler "Destek Talebi Oluştur" butonuna bastığında karşılarına çıkacak konu başlıklarını ekleyin.</p>
+                    <div class="form-grid-3">
+                        <div class="form-group">
+                            <label>Kategori Adı</label>
+                            <input type="text" id="tk-konu-isim" placeholder="Örn: Teknik Destek">
+                        </div>
+                        <div class="form-group">
+                            <label>Kısa Açıklama</label>
+                            <input type="text" id="tk-konu-aciklama" placeholder="Örn: Hata ve bug bildirimi için">
+                        </div>
+                        <div class="form-group">
+                            <label>Emoji</label>
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" id="tk-konu-emoji" value="🎫" style="max-width:70px;">
+                                <button class="btn btn-primary" onclick="ticketKonuEkle()">+ Ekle</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tags-box" id="tk-konular-listesi"></div>
+                </div>
+
+                <div class="card">
+                    <h3>📩 Sunucuya Ticket Oluşturma Mesajı Gönder</h3>
+                    <div class="form-group">
+                        <label>Gönderilecek Kanal</label>
+                        <select id="tk-kur-kanal"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Embed Başlığı</label>
+                        <input type="text" id="tk-kur-baslik" value="🎫 Destek & Yardım Merkezi">
+                    </div>
+                    <div class="form-group">
+                        <label>Açıklama Metni</label>
+                        <textarea id="tk-kur-aciklama" rows="2">Destek almak istediğiniz kategoriyi seçerek yeni bir bilet oluşturmak için aşağıdaki butona tıklayın.</textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="ticketPanelGonder()">🚀 Ticket Mesajını Kanala Gönder</button>
+                </div>
+            </section>
+
+            <!-- 4. KAPATILAN BİLETLER -->
+            <section id="sec-arsiv" class="page-section">
+                <div class="section-header">
+                    <div>
+                        <h1>📁 Kapatılan Biletler (Sohbet Arşivi)</h1>
+                        <p>Kapatılan tüm destek taleplerinin tam konuşma kayıtlarını buradan inceleyebilirsiniz.</p>
+                    </div>
+                </div>
+
+                <div class="card table-wrap">
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>Bilet Kanalı</th>
+                                <th>Kategori</th>
+                                <th>Kapatan Yetkili</th>
+                                <th>Kapanış Tarihi</th>
+                                <th>Mesaj</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="arsiv-tablo"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 5. ÖZEL KOMUT OLUŞTURUCU -->
+            <section id="sec-komutlar" class="page-section">
+                <div class="section-header">
+                    <div>
+                        <h1>⚡ Özel Komut Oluşturucu</h1>
+                        <p>Sohbete belirlediğiniz komut yazıldığında (örn: !server, !ip, !site) botun otomatik atacağı mesajı veya URL'yi ayarlayın.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>➕ Yeni Komut Ekle</h3>
+                    <div class="form-grid" style="margin-top:12px;">
+                        <div class="form-group">
+                            <label>Tetikleyici Kelime / Komut (Örn: !server veya !dc)</label>
+                            <input type="text" id="km-tetik" placeholder="!server">
+                        </div>
+                        <div class="form-group">
+                            <label>Botun Vereceği Cevap veya URL</label>
+                            <input type="text" id="km-cevap" placeholder="https://discord.gg/... veya sunucu bilgisi">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="ozelKomutEkle()">+ Komutu Kaydet</button>
+                </div>
+
+                <div class="card table-wrap">
+                    <h3>📜 Aktif Özel Komutlar</h3>
+                    <table class="log-table" style="margin-top:12px;">
+                        <thead><tr><th>Komut</th><th>Botun Cevabı / URL</th><th>İşlem</th></tr></thead>
+                        <tbody id="komutlar-tablo"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 6. KANAL KISITLAMALARI -->
+            <section id="sec-kanallar" class="page-section">
+                <div class="section-header">
+                    <div>
+                        <h1>🚦 Kanal Kısıtlamaları</h1>
+                        <p>Oyun, kumarhane ve özel komutların yalnızca izin verilen kanallarda çalışmasını sağlayın. (Liste boşsa tüm kanallarda çalışır)</p>
+                    </div>
+                </div>
+
+                <div class="form-grid-3">
+                    <div class="card">
+                        <h3>🎰 Kumarhane Kanalları</h3>
+                        <p class="desc"><code>k cf</code>, <code>k bj</code>, <code>k mine</code>, <code>k av</code> komutları için izinli kanallar.</p>
+                        <div style="display:flex; gap:8px;">
+                            <select id="kn-kumarhane-sec"></select>
+                            <button class="btn btn-primary" onclick="kanalKisitEkle('kumarhaneKanallari', 'kn-kumarhane-sec')">+ Ekle</button>
+                        </div>
+                        <div class="tags-box" id="kn-kumarhane-listesi"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎮 Mini Oyun Kanalları</h3>
+                        <p class="desc"><code>/adam-asmaca</code>, <code>/bayrak-oyunu</code>, <code>/dc</code> vb. komutlar için.</p>
+                        <div style="display:flex; gap:8px;">
+                            <select id="kn-oyun-sec"></select>
+                            <button class="btn btn-primary" onclick="kanalKisitEkle('oyunKanallari', 'kn-oyun-sec')">+ Ekle</button>
+                        </div>
+                        <div class="tags-box" id="kn-oyun-listesi"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3>⚡ Özel Komut Kanalları</h3>
+                        <p class="desc"><code>!server</code> gibi özel komutların kullanılabileceği kanallar.</p>
+                        <div style="display:flex; gap:8px;">
+                            <select id="kn-komut-sec"></select>
+                            <button class="btn btn-primary" onclick="kanalKisitEkle('komutKanallari', 'kn-komut-sec')">+ Ekle</button>
+                        </div>
+                        <div class="tags-box" id="kn-komut-listesi"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. ÜYE YÖNETİMİ (CRM) -->
+            <section id="sec-uyeler" class="page-section">
+                <div class="section-header">
+                    <div>
+                        <h1>Canlı Üye Yönetimi (CRM)</h1>
+                        <p>Üyelere rol verin/alın veya panelden susturma, atma ve yasaklama uygulayın.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="log-controls">
+                        <input type="text" id="uye-arama" placeholder="🔍 Kullanıcı adı veya ID ara..." style="max-width: 340px;" oninput="uyeleriCiz()">
+                        <select id="toplu-rol-secim" style="max-width: 240px;"></select>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="log-table">
+                            <thead><tr><th>Üye</th><th>Mevcut Roller</th><th>Hızlı İşlemler</th></tr></thead>
+                            <tbody id="uyeler-tablo"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. BUTONLU ROL MENÜSÜ -->
+            <section id="sec-roller" class="page-section">
+                <div class="section-header"><div><h1>Butonlu Rol Alma Oluşturucu</h1></div></div>
+                <div class="card">
+                    <div class="form-group"><label>Gönderilecek Kanal</label><select id="rb-kanal"></select></div>
+                    <div class="form-group"><label>Embed Başlığı</label><input type="text" id="rb-baslik" value="🎭 Rol Seçim Paneli"></div>
+                    <div class="form-group"><label>Açıklama</label><textarea id="rb-aciklama" rows="2">Butonlara tıklayarak rol alabilirsiniz.</textarea></div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Rol</label><select id="rb-rol-sec"></select></div>
+                        <div class="form-group"><label>Buton Yazısı</label><div style="display:flex; gap:8px;"><input type="text" id="rb-etiket" placeholder="🎮 Oyuncu"><button class="btn btn-primary" onclick="rolButonuEkle()">Ekle</button></div></div>
+                    </div>
+                    <div class="tags-box" id="rb-eklenen-listesi" style="margin-bottom:16px;"></div>
+                    <button class="btn btn-success" onclick="rolMenusuGonder()">🚀 Rol Menüsünü Gönder</button>
+                </div>
+            </section>
+
+            <!-- 9. HOŞ GELDİN & OTO-ROL -->
+            <section id="sec-hosgeldin" class="page-section">
+                <div class="section-header"><div><h1>Hoş Geldin & Otomatik Rol</h1></div></div>
+                <div class="card">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Hoş Geldin Kanalı</label><select id="hg-kanal"></select></div>
+                        <div class="form-group"><label>Otomatik Rol</label><select id="hg-otorol"></select></div>
+                    </div>
+                    <div class="form-group"><label>Mesaj ({user}, {server}, {memberCount})</label><textarea id="hg-mesaj" rows="3"></textarea></div>
+                    <button class="btn btn-success" onclick="hosgeldinKaydet()">💾 Kaydet</button>
+                </div>
+            </section>
+
+            <!-- 10. DUYURU -->
+            <section id="sec-duyuru" class="page-section">
+                <div class="section-header"><div><h1>Gelişmiş Embed Duyuru Oluşturucu</h1></div></div>
+                <div class="embed-layout">
+                    <div class="card">
+                        <div class="form-grid">
+                            <div class="form-group"><label>Kanal</label><select id="dy-kanal"></select></div>
+                            <div class="form-group"><label>Renk</label><input type="color" id="dy-renk" value="#5865F2" style="height:42px;" oninput="onizlemeGuncelle()"></div>
+                        </div>
+                        <div class="form-group"><label>Başlık</label><input type="text" id="dy-baslik" oninput="onizlemeGuncelle()"></div>
+                        <div class="form-group"><label>İçerik</label><textarea id="dy-mesaj" rows="4" oninput="onizlemeGuncelle()"></textarea></div>
+                        <div class="form-group"><label>Görsel URL</label><input type="text" id="dy-gorsel" oninput="onizlemeGuncelle()"></div>
+                        <div class="form-group"><input type="checkbox" id="dy-everyone" style="width:auto;"> @everyone etiketle</div>
+                        <button class="btn btn-primary" onclick="duyuruYayinla()">📢 Gönder</button>
+                    </div>
+                    <div class="discord-preview-box">
+                        <div class="discord-msg-header"><img src="https://cdn.discordapp.com/embed/avatars/0.png"><strong>KingBot</strong> <span class="bot-badge">BOT</span></div>
+                        <div class="discord-embed" id="prev-box"><h4 id="prev-title">Başlık</h4><p id="prev-desc">Mesaj...</p><img id="prev-img"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 11. EKONOMİ & SEVİYE -->
+            <section id="sec-ekonomi" class="page-section">
+                <div class="section-header"><div><h1>Ekonomi, Seviye & Liderlik Tablosu</h1></div></div>
+                <div class="form-grid">
+                    <div class="card">
+                        <h3>⚙️ Ekonomi & Seviye Zorluk Ayarları</h3>
+                        <div class="form-grid" style="margin-top:12px;">
+                            <div class="form-group"><label>Günlük Ödül (KM)</label><input type="number" id="ek-gunluk"></div>
+                            <div class="form-group"><label>XP Zorluk Çarpanı (Level² × Çarpan)</label><input type="number" id="ek-xp-carpan"></div>
+                        </div>
+                        <div class="toggle-row">
+                            <div><strong>Ses Kanalı XP & KM Ödülü</strong><p style="font-size:12px; color:var(--muted);">Seste aktif konuşan üyelere her dakika ödül verir.</p></div>
+                            <label class="switch"><input type="checkbox" id="ek-ses-aktif"><span class="slider"></span></label>
+                        </div>
+                        <div class="form-grid" style="margin-top:10px;">
+                            <div class="form-group"><label>Ses Dakika Başı XP</label><input type="number" id="ek-ses-xp"></div>
+                            <div class="form-group"><label>Ses Dakika Başı KM</label><input type="number" id="ek-ses-km"></div>
+                        </div>
+                        <button class="btn btn-success" onclick="ekonomiAyarKaydet()">💾 Ayarları Kaydet</button>
+
+                        <hr style="border-color:var(--border); margin:18px 0;">
+                        <h3>💳 Manuel Bakiye Düzenle</h3>
+                        <div class="form-grid" style="margin-top:10px;">
+                            <div class="form-group"><label>Kullanıcı ID</label><input type="text" id="ek-hedef-id" placeholder="Discord Kullanıcı ID"></div>
+                            <div class="form-group"><label>Yeni Bakiye (KM)</label><input type="number" id="ek-miktar"></div>
+                        </div>
+                        <button class="btn btn-primary" onclick="bakiyeGuncelle()">Bakiye Uygula</button>
+                    </div>
+                    <div class="card table-wrap">
+                        <h3>🏆 En Zengin 10 Üye</h3>
+                        <table class="log-table" style="margin-top:12px;"><thead><tr><th>#</th><th>Kullanıcı</th><th>Bakiye</th></tr></thead><tbody id="zenginler-tablo"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 12. LOGLAR -->
+            <section id="sec-loglar" class="page-section">
+                <div class="section-header">
+                    <div><h1>Detaylı Denetim Kayıtları (Audit Logs)</h1></div>
+                    <button class="btn btn-danger" onclick="loglariTemizle()">🗑️ Geçmişi Temizle</button>
+                </div>
+                <div class="card">
+                    <div class="log-controls">
+                        <input type="text" id="log-arama" placeholder="🔍 Ara..." style="max-width:300px;" oninput="loglariFiltrele()">
+                        <select id="log-kategori" style="max-width:220px;" onchange="loglariFiltrele()">
+                            <option value="HEPSI">Tüm Kategoriler</option>
+                            <option value="PANEL">Panel İşlemleri</option>
+                            <option value="MODERASYON">Moderasyon & Panik</option>
+                            <option value="ROL">Rol İşlemleri</option>
+                            <option value="UYE">Üye Giriş / Çıkış</option>
+                            <option value="TICKET">Ticket İşlemleri</option>
+                            <option value="EKONOMI">Ekonomi İşlemleri</option>
+                        </select>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="log-table">
+                            <thead><tr><th>Tarih</th><th>Kategori</th><th>Olay</th><th>Detay</th><th>Kullanıcı</th></tr></thead>
+                            <tbody id="tum-loglar-tablo"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin.startsWith('http') && !window.location.origin.includes('null')
+            ? window.location.origin
+            : 'http://localhost:3000';
+
+        let globalData = null;
+        let rolButonListesi = [];
+        let seciliGuildId = localStorage.getItem('kb_guild_id') || '';
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function bildirim(mesaj, hataMi = false) {
+            const box = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast' + (hataMi ? ' error' : '');
+            el.innerText = mesaj;
+            box.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
+
+        function girisYap() {
+            const suankiAdres = window.location.origin + window.location.pathname;
+            window.location.href = `${API_URL}/auth/discord?redirect=${encodeURIComponent(suankiAdres)}`;
+        }
+
+        function cikisYap() {
+            localStorage.removeItem('kb_user');
+            localStorage.removeItem('kb_guild_id');
+            window.location.href = window.location.pathname;
+        }
+
+        function sekmeAc(sekmeId, btn) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('sec-' + sekmeId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        async function apiIstek(endpoint, options = {}) {
+            const user = JSON.parse(localStorage.getItem('kb_user'));
+            if (!user || !user.token) {
+                cikisYap();
+                throw new Error('Oturum bulunamadı');
+            }
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${user.token}`,
+                ...(options.headers || {})
+            };
+            const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
+            if (res.status === 401) {
+                bildirim('Oturum süresi doldu, tekrar giriş yapın.', true);
+                setTimeout(cikisYap, 1200);
+                throw new Error('Yetkisiz oturum');
+            }
+            return res.json();
+        }
+
+        window.onload = async () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('token') && params.get('id')) {
+                localStorage.setItem('kb_user', JSON.stringify({
+                    token: params.get('token'),
+                    id: params.get('id'),
+                    username: params.get('username'),
+                    avatar: params.get('avatar')
+                }));
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            const user = JSON.parse(localStorage.getItem('kb_user'));
+            if (!user || !user.token) return;
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            document.getElementById('usr-name').innerText = user.username;
+            document.getElementById('usr-avatar').src = user.avatar;
+
+            await sunuculariYukle();
+        };
+
+        async function sunuculariYukle() {
+            try {
+                const data = await apiIstek('/api/sunucular');
+                const selector = document.getElementById('guild-selector');
+                selector.innerHTML = '';
+
+                if (!data.sunucular || data.sunucular.length === 0) {
+                    bildirim('Yönetici yetkisine sahip olduğunuz bir sunucu bulunamadı!', true);
+                    return;
+                }
+
+                data.sunucular.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.innerText = s.name;
+                    selector.appendChild(opt);
+                });
+
+                if (!seciliGuildId || !data.sunucular.some(s => s.id === seciliGuildId)) {
+                    seciliGuildId = data.sunucular[0].id;
+                    localStorage.setItem('kb_guild_id', seciliGuildId);
+                }
+                selector.value = seciliGuildId;
+                await verileriYenile();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function sunucuDegistir(yeniGuildId) {
+            seciliGuildId = yeniGuildId;
+            localStorage.setItem('kb_guild_id', seciliGuildId);
+            await verileriYenile();
+        }
+
+        async function verileriYenile() {
+            if (!seciliGuildId) return;
+            try {
+                const data = await apiIstek(`/api/panel/${seciliGuildId}`);
+                if (data.hata) return bildirim(data.hata, true);
+                globalData = data;
+                const a = data.ayarlar;
+
+                document.getElementById('srv-name').innerText = data.sunucuAdi;
+                document.getElementById('srv-icon').src = data.sunucuIkon;
+                document.getElementById('st-members').innerText = data.uyeSayisi;
+                document.getElementById('st-tickets').innerText = data.kapatilanBiletler.length;
+                document.getElementById('st-cmds').innerText = data.ozelKomutlar.length;
+                document.getElementById('st-ping').innerText = `${data.ping} ms / ${data.uptime} dk`;
+
+                const panikBtn = document.getElementById('btn-panik');
+                panikBtn.innerText = a.panikModu ? '🚨 Panik Modu: AKTİF (Kilidi Aç)' : '🚨 Panik Modu: Kapalı';
+                panikBtn.className = a.panikModu ? 'btn btn-warning' : 'btn btn-danger';
+
+                // Moderasyon Alanları
+                document.getElementById('mod-otomod').checked = !!a.otoMod;
+                document.getElementById('mod-davet').checked = !!a.davetEngel;
+                document.getElementById('mod-link').checked = !!a.linkEngel;
+                document.getElementById('mod-spam').checked = !!a.spamEngel;
+                document.getElementById('mod-spam-limit').value = a.spamMesajLimiti || 5;
+                document.getElementById('mod-spam-saniye').value = a.spamSaniye || 5;
+                document.getElementById('mod-spam-ceza').value = a.spamCezaDakika || 5;
+                document.getElementById('mod-tekrar').checked = !!a.tekrarMesajEngel;
+                document.getElementById('mod-caps').checked = !!a.capsEngel;
+                document.getElementById('mod-caps-yuzde').value = a.capsYuzde || 70;
+                document.getElementById('mod-caps-min').value = a.capsMinUzunluk || 8;
+                document.getElementById('mod-etiket').checked = !!a.etiketEngel;
+                document.getElementById('mod-max-etiket').value = a.maxEtiketSayisi || 4;
+                document.getElementById('mod-emoji').checked = !!a.emojiSpamEngel;
+                document.getElementById('mod-max-emoji').value = a.maxEmojiSayisi || 8;
+                document.getElementById('mod-zalgo').checked = !!a.zalgoEngel;
+                document.getElementById('mod-antiraid').checked = !!a.antiRaid;
+                document.getElementById('mod-yenihesap').checked = !!a.yeniHesapEngel;
+                document.getElementById('mod-yenihesap-gun').value = a.yeniHesapMinGun || 3;
+
+                kelimeleriCiz();
+                izinliLinkleriCiz();
+
+                // Select Kutuları
+                kanalSelectDoldur('mod-log-kanal', data.kanallar, a.modLogKanal, true);
+                kanalSelectDoldur('hg-kanal', data.kanallar, a.hosgeldinKanal, true);
+                kanalSelectDoldur('tk-kur-kanal', data.kanallar, '', false);
+                kanalSelectDoldur('dy-kanal', data.kanallar, '', false);
+                kanalSelectDoldur('rb-kanal', data.kanallar, '', false);
+                kanalSelectDoldur('kn-kumarhane-sec', data.kanallar, '', false);
+                kanalSelectDoldur('kn-oyun-sec', data.kanallar, '', false);
+                kanalSelectDoldur('kn-komut-sec', data.kanallar, '', false);
+
+                kanalSelectDoldur('tk-kategori', data.kategoriler, a.ticketKategori, true);
+
+                kanalSelectDoldur('hg-otorol', data.roller, a.otoRol, true);
+                kanalSelectDoldur('tk-destek-rol-sec', data.roller, '', false);
+                kanalSelectDoldur('tk-tam-rol-sec', data.roller, '', false);
+                kanalSelectDoldur('toplu-rol-secim', data.roller, '', false);
+                kanalSelectDoldur('rb-rol-sec', data.roller, '', false);
+
+                // Hoş Geldin & Ekonomi
+                document.getElementById('hg-mesaj').value = a.hosgeldinMesaj || '';
+                document.getElementById('ek-gunluk').value = a.gunlukOdul || 250;
+                document.getElementById('ek-xp-carpan').value = a.xpZorlukCarpani || 250;
+                document.getElementById('ek-ses-aktif').checked = !!a.sesXpAktif;
+                document.getElementById('ek-ses-xp').value = a.sesDakikaXp || 15;
+                document.getElementById('ek-ses-km').value = a.sesDakikaKm || 10;
+
+                ticketRolleriCiz();
+                ticketKonulariCiz();
+                kanalKisitlariCiz();
+                arsivCiz();
+                komutlariCiz();
+                uyeleriCiz();
+
+                document.getElementById('zenginler-tablo').innerHTML = data.zenginler.map((z, i) => `
+                    <tr><td>#${i + 1}</td><td>${escapeHtml(z.isim)}</td><td><strong>${z.km} KM</strong></td></tr>
+                `).join('') || '<tr><td colspan="3">Veri yok.</td></tr>';
+
+                loglariFiltrele();
+                document.getElementById('ozet-log-tablo').innerHTML = data.logs.slice(0, 6).map(logSatiriHtml).join('');
+            } catch (err) {
+                bildirim('Bot sunucusuna bağlanılamadı!', true);
+            }
+        }
+
+        function kanalSelectDoldur(elementId, liste, seciliId, bosSecenek) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = bosSecenek ? '<option value="">-- Kapalı / Seçilmedi --</option>' : '';
+            liste.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.innerText = item.name;
+                if (item.id === seciliId) opt.selected = true;
+                el.appendChild(opt);
+            });
+        }
+
+        async function ayarGonder(yeniAyarlar, aciklama) {
+            const data = await apiIstek('/api/ayarlar', {
+                method: 'POST',
+                body: JSON.stringify({ guildId: seciliGuildId, yeniAyarlar, aciklama })
+            });
+            if (data.basarili) {
+                bildirim('✅ ' + aciklama);
+                await verileriYenile();
+            } else if (data.hata) {
+                bildirim(data.hata, true);
+            }
+        }
+
+        // --- MODERASYON ---
+        function moderasyonKaydet() {
+            ayarGonder({
+                modLogKanal: document.getElementById('mod-log-kanal').value,
+                otoMod: document.getElementById('mod-otomod').checked,
+                davetEngel: document.getElementById('mod-davet').checked,
+                linkEngel: document.getElementById('mod-link').checked,
+                spamEngel: document.getElementById('mod-spam').checked,
+                spamMesajLimiti: Number(document.getElementById('mod-spam-limit').value) || 5,
+                spamSaniye: Number(document.getElementById('mod-spam-saniye').value) || 5,
+                spamCezaDakika: Number(document.getElementById('mod-spam-ceza').value) || 5,
+                tekrarMesajEngel: document.getElementById('mod-tekrar').checked,
+                capsEngel: document.getElementById('mod-caps').checked,
+                capsYuzde: Number(document.getElementById('mod-caps-yuzde').value) || 70,
+                capsMinUzunluk: Number(document.getElementById('mod-caps-min').value) || 8,
+                etiketEngel: document.getElementById('mod-etiket').checked,
+                maxEtiketSayisi: Number(document.getElementById('mod-max-etiket').value) || 4,
+                emojiSpamEngel: document.getElementById('mod-emoji').checked,
+                maxEmojiSayisi: Number(document.getElementById('mod-max-emoji').value) || 8,
+                zalgoEngel: document.getElementById('mod-zalgo').checked,
+                antiRaid: document.getElementById('mod-antiraid').checked,
+                yeniHesapEngel: document.getElementById('mod-yenihesap').checked,
+                yeniHesapMinGun: Number(document.getElementById('mod-yenihesap-gun').value) || 3
+            }, 'Moderasyon ayarları kaydedildi');
+        }
+
+        function izinliLinkleriCiz() {
+            const liste = globalData.ayarlar.izinliLinkler || [];
+            document.getElementById('izinli-link-listesi').innerHTML = liste.map((d, i) => `
+                <span class="role-pill success">${escapeHtml(d)} <button onclick="izinliLinkSil(${i})">×</button></span>
+            `).join('');
+        }
+
+        function izinliLinkEkle() {
+            const input = document.getElementById('yeni-izinli-link');
+            const val = input.value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+            if (!val) return;
+            input.value = '';
+            const mevcut = globalData.ayarlar.izinliLinkler || [];
+            if (mevcut.includes(val)) return bildirim('Bu domain zaten ekli!', true);
+            ayarGonder({ izinliLinkler: [...mevcut, val] }, `İzinli link eklendi: ${val}`);
+        }
+
+        function izinliLinkSil(index) {
+            const mevcut = globalData.ayarlar.izinliLinkler || [];
+            const silinen = mevcut[index];
+            ayarGonder({ izinliLinkler: mevcut.filter((_, i) => i !== index) }, `İzinli link kaldırıldı: ${silinen}`);
+        }
+
+        function kelimeleriCiz() {
+            document.getElementById('kelime-listesi').innerHTML = (globalData.ayarlar.yasakliKelimeler || []).map((k, index) => `
+                <span class="tag">${escapeHtml(k)} <button onclick="kelimeSil(${index})">×</button></span>
+            `).join('');
+        }
+
+        function kelimeEkle() {
+            const input = document.getElementById('yeni-kelime');
+            const val = input.value.trim().toLowerCase();
+            if (!val) return;
+            input.value = '';
+            ayarGonder({ yasakliKelimeler: [...(globalData.ayarlar.yasakliKelimeler || []), val] }, `Yasaklı kelime eklendi: "${val}"`);
+        }
+
+        function kelimeSil(index) {
+            const silinen = globalData.ayarlar.yasakliKelimeler[index];
+            ayarGonder({ yasakliKelimeler: globalData.ayarlar.yasakliKelimeler.filter((_, i) => i !== index) }, `Yasaklı kelime kaldırıldı: "${silinen}"`);
+        }
+
+        // --- TICKET ÇOKLU ROLLER & KATEGORİLER ---
+        function ticketKategoriKaydet() {
+            ayarGonder({ ticketKategori: document.getElementById('tk-kategori').value }, 'Ticket Discord kategorisi güncellendi');
+        }
+
+        function ticketRolleriCiz() {
+            const rolBul = (id) => (globalData.roller.find(r => r.id === id)?.name || id);
+            const destek = globalData.ayarlar.ticketYetkiliRoller || [];
+            const tam = globalData.ayarlar.ticketTamYetkiliRoller || [];
+
+            document.getElementById('tk-destek-rol-listesi').innerHTML = destek.map(id => `
+                <span class="role-pill">@${escapeHtml(rolBul(id))} <button onclick="ticketRolSil('ticketYetkiliRoller', '${id}')">×</button></span>
+            `).join('') || '<span style="color:var(--muted); font-size:12px;">Rol eklenmedi.</span>';
+
+            document.getElementById('tk-tam-rol-listesi').innerHTML = tam.map(id => `
+                <span class="role-pill success">@${escapeHtml(rolBul(id))} <button onclick="ticketRolSil('ticketTamYetkiliRoller', '${id}')">×</button></span>
+            `).join('') || '<span style="color:var(--muted); font-size:12px;">Rol eklenmedi.</span>';
+        }
+
+        function ticketRolEkle(alanAdi, selectId) {
+            const rolId = document.getElementById(selectId).value;
+            if (!rolId) return;
+            const mevcut = globalData.ayarlar[alanAdi] || [];
+            if (mevcut.includes(rolId)) return bildirim('Bu rol zaten listede!', true);
+            ayarGonder({ [alanAdi]: [...mevcut, rolId] }, 'Ticket yetkili rolü eklendi');
+        }
+
+        function ticketRolSil(alanAdi, rolId) {
+            const mevcut = globalData.ayarlar[alanAdi] || [];
+            ayarGonder({ [alanAdi]: mevcut.filter(id => id !== rolId) }, 'Ticket yetkili rolü kaldırıldı');
+        }
+
+        function ticketKonulariCiz() {
+            const box = document.getElementById('tk-konular-listesi');
+            box.innerHTML = (globalData.ayarlar.ticketKonular || []).map((k, i) => `
+                <span class="role-pill">${escapeHtml(k.emoji)} <strong>${escapeHtml(k.isim)}</strong> (${escapeHtml(k.aciklama)}) <button onclick="ticketKonuSil(${i})">×</button></span>
+            `).join('');
+        }
+
+        function ticketKonuEkle() {
+            const isim = document.getElementById('tk-konu-isim').value.trim();
+            const aciklama = document.getElementById('tk-konu-aciklama').value.trim();
+            const emoji = document.getElementById('tk-konu-emoji').value.trim() || '🎫';
+            if (!isim) return bildirim('Kategori adı yazın!', true);
+
+            const yeniListe = [...(globalData.ayarlar.ticketKonular || []), { id: 'konu_' + Date.now(), isim, aciklama, emoji }];
+            document.getElementById('tk-konu-isim').value = '';
+            document.getElementById('tk-konu-aciklama').value = '';
+            ayarGonder({ ticketKonular: yeniListe }, `Ticket kategorisi eklendi: ${isim}`);
+        }
+
+        function ticketKonuSil(index) {
+            const silinen = globalData.ayarlar.ticketKonular[index].isim;
+            const yeniListe = globalData.ayarlar.ticketKonular.filter((_, i) => i !== index);
+            ayarGonder({ ticketKonular: yeniListe }, `Ticket kategorisi silindi: ${silinen}`);
+        }
+
+        // --- KANAL KISITLAMALARI ---
+        function kanalKisitlariCiz() {
+            const kanalBul = (id) => (globalData.kanallar.find(k => k.id === id)?.name || id);
+            const render = (alan, boxId) => {
+                const liste = globalData.ayarlar[alan] || [];
+                document.getElementById(boxId).innerHTML = liste.map(id => `
+                    <span class="role-pill">#${escapeHtml(kanalBul(id))} <button onclick="kanalKisitSil('${alan}', '${id}')">×</button></span>
+                `).join('') || '<span style="color:var(--muted); font-size:12px;">Tüm kanallarda serbest.</span>';
+            };
+            render('kumarhaneKanallari', 'kn-kumarhane-listesi');
+            render('oyunKanallari', 'kn-oyun-listesi');
+            render('komutKanallari', 'kn-komut-listesi');
+        }
+
+        function kanalKisitEkle(alan, selectId) {
+            const kanalId = document.getElementById(selectId).value;
+            if (!kanalId) return;
+            const mevcut = globalData.ayarlar[alan] || [];
+            if (mevcut.includes(kanalId)) return bildirim('Bu kanal zaten ekli!', true);
+            ayarGonder({ [alan]: [...mevcut, kanalId] }, 'Kanal kısıtlaması eklendi');
+        }
+
+        function kanalKisitSil(alan, kanalId) {
+            const mevcut = globalData.ayarlar[alan] || [];
+            ayarGonder({ [alan]: mevcut.filter(id => id !== kanalId) }, 'Kanal kısıtlaması kaldırıldı');
+        }
+
+        // --- KAPATILAN BİLETLER ---
+        function arsivCiz() {
+            const tablo = document.getElementById('arsiv-tablo');
+            tablo.innerHTML = globalData.kapatilanBiletler.map((b, idx) => `
+                <tr>
+                    <td><strong>#${escapeHtml(b.kanalAdi)}</strong></td>
+                    <td><span class="badge badge-TICKET">${escapeHtml(b.konu)}</span></td>
+                    <td>${escapeHtml(b.kapatan)}</td>
+                    <td style="color:var(--muted)">${escapeHtml(b.kapanisTarihi)}</td>
+                    <td>${b.mesajSayisi} mesaj</td>
+                    <td><button class="btn btn-sm btn-primary" onclick="biletOku(${idx})">👁️ Sohbeti Oku</button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="6">Henüz kapatılmış bir bilet kaydı yok.</td></tr>';
+        }
+
+        function biletOku(index) {
+            const bilet = globalData.kapatilanBiletler[index];
+            document.getElementById('modal-baslik').innerText = `📁 #${bilet.kanalAdi} — ${bilet.konu}`;
+            document.getElementById('modal-mesajlar').innerHTML = bilet.mesajlar.map(m => `
+                <div class="chat-msg">
+                    <img src="${escapeHtml(m.avatar)}" alt="Avatar">
+                    <div class="chat-bubble">
+                        <strong>${escapeHtml(m.yazar)}</strong><span>${escapeHtml(m.zaman)}</span>
+                        <p>${escapeHtml(m.icerik)}</p>
+                    </div>
+                </div>
+            `).join('') || '<p>Bu bilette mesaj bulunmuyor.</p>';
+            document.getElementById('ticket-modal').style.display = 'flex';
+        }
+
+        // --- ÖZEL KOMUTLAR ---
+        function komutlariCiz() {
+            document.getElementById('komutlar-tablo').innerHTML = globalData.ozelKomutlar.map((k, i) => `
+                <tr>
+                    <td><strong>${escapeHtml(k.tetikleyici)}</strong></td>
+                    <td>${escapeHtml(k.cevap)}</td>
+                    <td><button class="btn btn-sm btn-danger" onclick="ozelKomutSil(${i})">Sil</button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="3">Özel komut eklenmemiş.</td></tr>';
+        }
+
+        async function ozelKomutEkle() {
+            const tetikleyici = document.getElementById('km-tetik').value.trim();
+            const cevap = document.getElementById('km-cevap').value.trim();
+            if (!tetikleyici || !cevap) return bildirim('Komut ve cevap alanlarını doldurun!', true);
+
+            const yeniListe = [...globalData.ozelKomutlar, { tetikleyici, cevap }];
+            document.getElementById('km-tetik').value = '';
+            document.getElementById('km-cevap').value = '';
+            await komutlariKaydet(yeniListe, `Yeni özel komut eklendi: ${tetikleyici}`);
+        }
+
+        async function ozelKomutSil(index) {
+            const silinen = globalData.ozelKomutlar[index].tetikleyici;
+            const yeniListe = globalData.ozelKomutlar.filter((_, i) => i !== index);
+            await komutlariKaydet(yeniListe, `Özel komut silindi: ${silinen}`);
+        }
+
+        async function komutlariKaydet(komutlar, aciklama) {
+            const data = await apiIstek('/api/komutlar', {
+                method: 'POST',
+                body: JSON.stringify({ guildId: seciliGuildId, komutlar, aciklama })
+            });
+            if (data.basarili) {
+                bildirim('⚡ ' + aciklama);
+                await verileriYenile();
+            }
+        }
+
+        // --- PANİK & ÜYE & ROL & DUYURU & EKONOMİ ---
+        async function panikDegistir() {
+            const yeniDurum = !globalData.ayarlar.panikModu;
+            if (yeniDurum && !confirm('🚨 Tüm normal metin kanalları yazmaya kapatılacak! Onaylıyor musun?')) return;
+            const data = await apiIstek('/api/panik', {
+                method: 'POST',
+                body: JSON.stringify({ guildId: seciliGuildId, durum: yeniDurum })
+            });
+            if (data.basarili) {
+                bildirim(yeniDurum ? '🚨 PANİK MODU AKTİF!' : '✅ Kanalların kilidi açıldı.');
+                await verileriYenile();
+            }
+        }
+
+        function uyeleriCiz() {
+            if (!globalData) return;
+            const arama = document.getElementById('uye-arama').value.toLowerCase();
+            const filtreli = globalData.uyeler.filter(u => u.username.toLowerCase().includes(arama) || u.displayName.toLowerCase().includes(arama) || u.id.includes(arama));
+            document.getElementById('uyeler-tablo').innerHTML = filtreli.map(u => `
+                <tr>
+                    <td><div style="display:flex; align-items:center; gap:10px;"><img src="${escapeHtml(u.avatar)}" style="width:32px; height:32px; border-radius:50%;"><div><strong>${escapeHtml(u.displayName)}</strong><br><small style="color:var(--muted)">@${escapeHtml(u.username)}</small></div></div></td>
+                    <td>${u.roller.map(r => `<span class="role-pill">${escapeHtml(r.name)} <button onclick="uyeIslem('${u.id}', 'rol_cikar', '${r.id}')">×</button></span>`).join('') || '-'}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn btn-sm btn-primary" onclick="uyeRolVer('${u.id}')">+ Rol</button>
+                        <button class="btn btn-sm btn-warning" onclick="uyeIslem('${u.id}', 'timeout')">🔇 Sustur</button>
+                        <button class="btn btn-sm btn-danger" onclick="uyeIslem('${u.id}', 'kick')">👢 At</button>
+                        <button class="btn btn-sm btn-danger" onclick="uyeIslem('${u.id}', 'ban')">🔨 Ban</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function uyeRolVer(hedefId) {
+            const rolId = document.getElementById('toplu-rol-secim').value;
+            if (!rolId) return bildirim('Rol seçin!', true);
+            uyeIslem(hedefId, 'rol_ekle', rolId);
+        }
+
+        async function uyeIslem(hedefId, islem, rolId = '') {
+            let sebep = '';
+            if (['timeout', 'kick', 'ban'].includes(islem)) {
+                sebep = prompt('İşlem sebebi:');
+                if (sebep === null) return;
+            }
+            const data = await apiIstek('/api/uye/islem', {
+                method: 'POST',
+                body: JSON.stringify({ guildId: seciliGuildId, hedefId, islem, rolId, sebep })
+            });
+            if (data.hata) return bildirim(data.hata, true);
+            bildirim('✅ İşlem uygulandı!');
+            await verileriYenile();
+        }
+
+        function rolButonuEkle() {
+            if (rolButonListesi.length >= 5) return bildirim('En fazla 5 buton eklenebilir!', true);
+            const sel = document.getElementById('rb-rol-sec');
+            rolButonListesi.push({ rolId: sel.value, rolAdi: sel.options[sel.selectedIndex].text, etiket: document.getElementById('rb-etiket').value.trim() || sel.options[sel.selectedIndex].text });
+            document.getElementById('rb-etiket').value = '';
+            document.getElementById('rb-eklenen-listesi').innerHTML = rolButonListesi.map((b, i) => `<span class="role-pill">${escapeHtml(b.etiket)} ➔ @${escapeHtml(b.rolAdi)} <button onclick="rolButonListesi.splice(${i},1); this.parentElement.remove();">×</button></span>`).join('');
+        }
+
+        async function rolMenusuGonder() {
+            if (!rolButonListesi.length) return bildirim('Buton ekleyin!', true);
+            const data = await apiIstek('/api/rol-buton-kur', {
+                method: 'POST',
+                body: JSON.stringify({ guildId: seciliGuildId, kanalId: document.getElementById('rb-kanal').value, baslik: document.getElementById('rb-baslik').value, aciklama: document.getElementById('rb-aciklama').value, butonlar: rolButonListesi })
+            });
+            if (data.basarili) {
+                bildirim('🎭 Rol menüsü gönderildi!');
+                rolButonListesi = [];
+                document.getElementById('rb-eklenen-listesi').innerHTML = '';
+                await verileriYenile();
+            }
+        }
+
+        function hosgeldinKaydet() {
+            ayarGonder({
+                hosgeldinKanal: document.getElementById('hg-kanal').value,
+                otoRol: document.getElementById('hg-otorol').value,
+                hosgeldinMesaj: document.getElementById('hg-mesaj').value
+            }, 'Hoş geldin ayarları kaydedildi');
+        }
+
+        async function ticketPanelGonder() {
+            const data = await apiIstek('/api/ticket-kur', {
+                method: 'POST',
+                body: JSON.stringify({ guildId: seciliGuildId, kanalId: document.getElementById('tk-kur-kanal').value, baslik: document.getElementById('tk-kur-baslik').value, aciklama: document.getElementById('tk-kur-aciklama').value })
+            });
+            if (data.basarili) {
+                bildirim('🎫 Ticket paneli kanala gönderildi!');
+                await verileriYenile();
+            }
+        }
+
+        function onizlemeGuncelle() {
+            document.getElementById('prev-box').style.borderLeftColor = document.getElementById('dy-renk').value;
+            document.getElementById('prev-title').innerText = document.getElementById('dy-baslik').value || 'Başlık';
+            document.getElementById('prev-desc').innerText = document.getElementById('dy-mesaj').value || 'Mesaj...';
+            const img = document.getElementById('prev-img');
+            const url = document.getElementById('dy-gorsel').value.trim();
+            img.src = url;
+            img.style.display = url.startsWith('http') ? 'block' : 'none';
+        }
+
+        async function duyuruYayinla() {
+            const mesaj = document.getElementById('dy-mesaj').value;
+            if (!mesaj) return bildirim('Mesaj yazın!', true);
+            const data = await apiIstek('/api/duyuru', {
+                method: 'POST',
+                body: JSON.stringify({ guildId: seciliGuildId, kanalId: document.getElementById('dy-kanal').value, baslik: document.getElementById('dy-baslik').value, mesaj, renk: document.getElementById('dy-renk').value, gorselUrl: document.getElementById('dy-gorsel').value, herkesiEtiketle: document.getElementById('dy-everyone').checked })
+            });
+            if (data.basarili) {
+                bildirim('📢 Duyuru yayınlandı!');
+                await verileriYenile();
+            }
+        }
+
+        function ekonomiAyarKaydet() {
+            ayarGonder({
+                gunlukOdul: Number(document.getElementById('ek-gunluk').value) || 250,
+                xpZorlukCarpani: Number(document.getElementById('ek-xp-carpan').value) || 250,
+                sesXpAktif: document.getElementById('ek-ses-aktif').checked,
+                sesDakikaXp: Number(document.getElementById('ek-ses-xp').value) || 15,
+                sesDakikaKm: Number(document.getElementById('ek-ses-km').value) || 10
+            }, 'Ekonomi ve seviye ayarları güncellendi');
+        }
+
+        async function bakiyeGuncelle() {
+            const hedefId = document.getElementById('ek-hedef-id').value.trim();
+            if (!hedefId) return bildirim('Kullanıcı ID girin!', true);
+            const data = await apiIstek('/api/ekonomi/duzenle', {
+                method: 'POST',
+                body: JSON.stringify({ guildId: seciliGuildId, hedefId, miktar: document.getElementById('ek-miktar').value })
+            });
+            if (data.basarili) {
+                bildirim('💰 Bakiye güncellendi!');
+                await verileriYenile();
+            }
+        }
+
+        function logSatiriHtml(l) {
+            return `<tr><td style="color:var(--muted); white-space:nowrap;">${escapeHtml(l.tarih)}</td><td><span class="badge badge-${escapeHtml(l.kategori)}">${escapeHtml(l.kategori)}</span></td><td><strong>${escapeHtml(l.islem)}</strong></td><td>${escapeHtml(l.detay)}</td><td>${escapeHtml(l.kullanici)}</td></tr>`;
+        }
+
+        function loglariFiltrele() {
+            if (!globalData) return;
+            const arama = document.getElementById('log-arama').value.toLowerCase();
+            const kat = document.getElementById('log-kategori').value;
+            const filtreli = globalData.logs.filter(l => (kat === 'HEPSI' || l.kategori === kat) && (l.islem.toLowerCase().includes(arama) || l.detay.toLowerCase().includes(arama) || l.kullanici.toLowerCase().includes(arama)));
+            document.getElementById('tum-loglar-tablo').innerHTML = filtreli.map(logSatiriHtml).join('') || '<tr><td colspan="5">Kayıt yok.</td></tr>';
+        }
+
+        async function loglariTemizle() {
+            if (!confirm('Loglar silinsin mi?')) return;
+            await apiIstek('/api/logs/temizle', {
+                method: 'POST',
+                body: JSON.stringify({ guildId: seciliGuildId })
+            });
+            bildirim('🗑️ Loglar temizlendi.');
+            await verileriYenile();
+        }
+    </script>
+</body>
+</html>
